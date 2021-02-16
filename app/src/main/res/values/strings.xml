@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">GifApp</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="hot_title">Hot</string>
+    <string name="latest_title">Latest</string>
+    <string name="top_title">Top</string>
+</resources>
