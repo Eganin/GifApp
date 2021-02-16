@@ -1,4 +1,6 @@
 package com.example.gifapp.di
 
-class AppComponent {
+import android.content.Context
+
+class AppComponent(private val context : Context) {
 }
