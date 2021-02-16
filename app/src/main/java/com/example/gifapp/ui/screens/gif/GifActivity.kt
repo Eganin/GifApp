@@ -1,6 +1,7 @@
 package com.example.gifapp.ui.screens.gif
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -16,11 +17,8 @@ import com.example.gifapp.ui.presentation.gif.view.GifFragment
 
 class GifActivity : AppCompatActivity(), Router {
 
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_main)
         setupView()
     }
@@ -29,28 +27,30 @@ class GifActivity : AppCompatActivity(), Router {
         TODO("Not yet implemented")
     }
 
-    private fun openFragment(fragment: Fragment,addToBackStack : Boolean= true) {
-        val transaction =
-                supportFragmentManager.beginTransaction().replace(R.id.nav_host_fragment, fragment)
+    private fun openNewFragment(fragment: Fragment, addToBackStack: Boolean = true) {
+        val fragmentTransaction =
+                supportFragmentManager.beginTransaction().replace(R.id.main_container, fragment)
 
-        if(addToBackStack) transaction.addToBackStack(fragment::class.java.simpleName)
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(fragment::class.java.simpleName)
+        }
 
-        transaction.commit()
+        fragmentTransaction.commit()
     }
 
     private fun setupView() {
-        binding.navView.setOnNavigationItemSelectedListener {
+        findViewById<BottomNavigationView>(R.id.nav_view).setOnNavigationItemSelectedListener{
             when (it.itemId) {
                 R.id.navigation_hot -> {
-                    openFragment(fragment = GifFragment.newInstance(type=FragmentType.HOT))
+                    openNewFragment(fragment = GifFragment.newInstance(type=FragmentType.HOT))
                     true
                 }
                 R.id.navigation_last -> {
-                    openFragment(fragment = GifFragment.newInstance(type=FragmentType.LATEST))
+                    openNewFragment(fragment = GifFragment.newInstance(type=FragmentType.LATEST))
                     true
                 }
                 R.id.navigation_top -> {
-                    openFragment(fragment = GifFragment.newInstance(type=FragmentType.TOP))
+                    openNewFragment(fragment = GifFragment.newInstance(type=FragmentType.TOP))
                     true
                 }
                 else -> false
