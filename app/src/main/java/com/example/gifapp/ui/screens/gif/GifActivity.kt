@@ -1,16 +1,10 @@
 package com.example.gifapp.ui.screens.gif
 
 import android.os.Bundle
-import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.example.gifapp.R
-import com.example.gifapp.databinding.ActivityMainBinding
 import com.example.gifapp.ui.presentation.gif.util.FragmentType
 import com.example.gifapp.ui.presentation.gif.util.Router
 import com.example.gifapp.ui.presentation.gif.view.GifFragment
