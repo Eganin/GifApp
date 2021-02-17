@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.gifapp.data.model.repository.GifRepository
+import com.example.gifapp.ui.presentation.gif.util.FragmentType
 import com.example.gifapp.ui.presentation.gif.viewmodel.GifViewModel
 
-class AppComponent(private val context: Context) {
+class AppComponent{
     private val gifRepository = GifRepository()
 
     private fun getGifRepository() = gifRepository

@@ -1,5 +1,6 @@
 package com.example.gifapp.ui.presentation.gif.viewmodel
 
+import android.graphics.pdf.PdfDocument
 import androidx.lifecycle.*
 import com.example.gifapp.data.model.entity.GifResponse
 import com.example.gifapp.data.model.repository.GifRepository
@@ -18,32 +19,27 @@ class GifViewModel(private val repository: Repository) : ViewModel(){
 
     private val scope = CoroutineScope(SupervisorJob()+dispatcher+exceptionHandler)
 
-    private val _state = MutableLiveData<Boolean>()
-    val state: LiveData<Boolean> = _state
-
     private val _gif = MutableLiveData<GifResponse>()
     val gif: LiveData<GifResponse> = _gif
 
 
     fun loadGif(type: FragmentType) {
         scope.launch {
-            _state.value = true
-            _gif.value = when (type) {
-                FragmentType.LATEST -> repository.getLatestGif()?.get(Pager.count)
-                FragmentType.TOP -> repository.getTopGif()?.get(Pager.count)
-                FragmentType.HOT -> repository.getHotGif()?.get(Pager.count)
-            }
+            if(Pager.count % 5 ==0 ) Pager.page++
 
-            _state.value = false
+            _gif.value = when (type) {
+                FragmentType.LATEST -> repository.getGif(type=type,page=Pager.count)?.get(Pager.count)
+                FragmentType.TOP -> repository.getGif(type=type,page=Pager.count)?.get(Pager.count)
+                FragmentType.HOT -> repository.getGif(type=type,page=Pager.count)?.get(Pager.count)
+            }
             Pager.count++
         }
 
     }
 
-
-
     @Suppress("UNCHECKED_CAST")
-    class Factory(private val repository: GifRepository) : ViewModelProvider.NewInstanceFactory() {
+    class Factory(private val repository: GifRepository)
+        : ViewModelProvider.NewInstanceFactory() {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return GifViewModel(repository = repository) as T
@@ -54,4 +50,5 @@ class GifViewModel(private val repository: Repository) : ViewModel(){
 
 object Pager {
     var count = 0
+    var page = 0
 }

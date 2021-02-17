@@ -16,11 +16,11 @@ class GifActivity : AppCompatActivity(), Router {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setupView()
+        openGifFragment()
     }
 
     override fun openGifFragment() {
-        TODO("Not yet implemented")
+        openNewFragment(fragment = GifFragment(),addToBackStack = true)
     }
 
     override fun onDestroy() {
@@ -28,7 +28,7 @@ class GifActivity : AppCompatActivity(), Router {
         Pager.count--
     }
 
-    private fun openNewFragment(fragment: Fragment, addToBackStack: Boolean = true) {
+    private fun openNewFragment(fragment: Fragment, addToBackStack: Boolean = false) {
         val fragmentTransaction =
                 supportFragmentManager.beginTransaction().replace(R.id.main_container, fragment)
 
@@ -39,28 +39,6 @@ class GifActivity : AppCompatActivity(), Router {
         fragmentTransaction.commit()
     }
 
-    private fun setupView() {
-        findViewById<BottomNavigationView>(R.id.nav_view).setOnNavigationItemSelectedListener{
-            when (it.itemId) {
-                R.id.navigation_hot -> {
-                    openNewFragment(fragment = GifFragment.newInstance(type=FragmentType.HOT))
-                    Pager.count=0
-                    true
-                }
-                R.id.navigation_last -> {
-                    openNewFragment(fragment = GifFragment.newInstance(type=FragmentType.LATEST))
-                    Pager.count=0
-                    true
-                }
-                R.id.navigation_top -> {
-                    openNewFragment(fragment = GifFragment.newInstance(type=FragmentType.TOP))
-                    Pager.count=0
-                    true
-                }
-                else -> false
-            }
-        }
-    }
 
 
 }

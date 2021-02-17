@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -41,14 +42,8 @@ class GifFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.gif.observe(viewLifecycleOwner, { updateGifView(value = it) })
-        viewModel.state.observe(viewLifecycleOwner, { setStateProgressBar(state = it) })
-        binding.materialNext.setOnClickListener {
-            load()
-        }
-        binding.materialReset.setOnClickListener {
-            Pager.count--
-            load()
-        }
+        setListenersView()
+        load()
     }
 
     override fun onDestroy() {
@@ -56,17 +51,67 @@ class GifFragment : Fragment() {
         _binding = null
     }
 
-    private fun load() {
-        when (arguments?.getString(SAVE_TYPE_FRAGMENT)) {
-            "HOT" -> viewModel.loadGif(type = FragmentType.HOT)
-            "LATEST" -> viewModel.loadGif(type = FragmentType.LATEST)
-            "TOP" -> viewModel.loadGif(type = FragmentType.TOP)
+    private fun setListenersView() {
+        binding.materialNext.setOnClickListener {
+            load()
+        }
+        binding.materialReset.setOnClickListener {
+            Pager.count--
+            load()
+        }
+
+        binding.tvLatest?.setOnClickListener {
+            changeType(view = it, type = LATEST)
+        }
+
+        binding.tvHot?.setOnClickListener {
+            changeType(view = it, type = HOT)
+        }
+
+        binding.tvTop?.setOnClickListener {
+            changeType(view = it, type = TOP)
         }
     }
 
-    private fun setStateProgressBar(state: Boolean) {
-        binding.progressBar.isVisible = state
+    private fun changeType(view: View, type: String) {
+        Pager.count=0
+        val text = view as TextView
+        text.setTextColor(resources.getColor(R.color.black))
+        when (type) {
+            LATEST -> {
+                binding.latestUnderLine?.isVisible = true
+                binding.hotUnderLine?.isVisible = false
+                binding.topUnderLine?.isVisible = false
+            }
+            TOP -> {
+                binding.latestUnderLine?.isVisible = false
+                binding.hotUnderLine?.isVisible = false
+                binding.topUnderLine?.isVisible = true
+            }
+            else -> {
+                binding.latestUnderLine?.isVisible = false
+                binding.hotUnderLine?.isVisible = true
+                binding.topUnderLine?.isVisible = false
+            }
+        }
+        load()
     }
+
+    private fun getType() =
+        when {
+            binding.latestUnderLine?.isVisible == true -> LATEST
+            binding.topUnderLine?.isVisible == true -> TOP
+            else -> HOT
+        }
+
+    private fun load() {
+        when (getType()) {
+            HOT -> viewModel.loadGif(type = FragmentType.HOT)
+            LATEST -> viewModel.loadGif(type = FragmentType.LATEST)
+            TOP -> viewModel.loadGif(type = FragmentType.TOP)
+        }
+    }
+
 
     private fun updateGifView(value: GifResponse) {
         Log.d("AAA", value.gifURL.toString())
@@ -79,15 +124,10 @@ class GifFragment : Fragment() {
 
     }
 
-
     companion object {
-
-        private const val SAVE_TYPE_FRAGMENT = "SAVE_TYPE_FRAGMENT"
-
-        fun newInstance(type: FragmentType): GifFragment =
-            GifFragment().apply {
-                arguments = Bundle().apply { putString(SAVE_TYPE_FRAGMENT, type.value) }
-            }
-
+        private const val LATEST = "LATEST"
+        private const val HOT = "HOT"
+        private const val TOP = "TOP"
     }
+
 }
