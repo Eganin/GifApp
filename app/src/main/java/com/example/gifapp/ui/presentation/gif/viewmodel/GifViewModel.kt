@@ -1,6 +1,5 @@
 package com.example.gifapp.ui.presentation.gif.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.gifapp.data.model.entity.GifResponse
 import com.example.gifapp.data.model.repository.GifRepository
@@ -11,13 +10,13 @@ import kotlinx.coroutines.*
 class GifViewModel(private val repository: Repository) : ViewModel(){
 
 
-    private val dispatcher = Dispatchers.IO
+    private val dispatcher = Dispatchers.Main.immediate
 
     private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         println("$exception in $coroutineContext")
     }
 
-    private val scope = CoroutineScope(dispatcher)
+    private val scope = CoroutineScope(SupervisorJob()+dispatcher+exceptionHandler)
 
     private val _state = MutableLiveData<Boolean>()
     val state: LiveData<Boolean> = _state
@@ -27,7 +26,7 @@ class GifViewModel(private val repository: Repository) : ViewModel(){
 
 
     fun loadGif(type: FragmentType) {
-        viewModelScope.launch {
+        scope.launch {
             _state.value = true
             _gif.value = when (type) {
                 FragmentType.LATEST -> repository.getLatestGif()?.get(Pager.count)

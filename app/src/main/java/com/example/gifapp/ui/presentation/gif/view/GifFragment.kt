@@ -15,6 +15,7 @@ import com.example.gifapp.data.model.entity.GifResponse
 import com.example.gifapp.databinding.FragmentGifBinding
 import com.example.gifapp.ui.presentation.gif.util.FragmentType
 import com.example.gifapp.ui.presentation.gif.util.options
+import com.example.gifapp.ui.presentation.gif.viewmodel.Pager
 
 class GifFragment : Fragment() {
 
@@ -41,7 +42,13 @@ class GifFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.gif.observe(viewLifecycleOwner, { updateGifView(value = it) })
         viewModel.state.observe(viewLifecycleOwner, { setStateProgressBar(state = it) })
-        load()
+        binding.materialNext.setOnClickListener {
+            load()
+        }
+        binding.materialReset.setOnClickListener {
+            Pager.count--
+            load()
+        }
     }
 
     override fun onDestroy() {
