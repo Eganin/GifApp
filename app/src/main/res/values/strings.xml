@@ -8,4 +8,6 @@
     <string name="top_title">Top</string>
     <string name="gif_title">Gif</string>
     <string name="developer_life">Developers life</string>
+    <string name="text_again_message">An error occurred while loading the data.
+        Try again later</string>
 </resources>

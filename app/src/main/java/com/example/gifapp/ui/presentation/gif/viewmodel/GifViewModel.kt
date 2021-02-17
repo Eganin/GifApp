@@ -7,6 +7,7 @@ import com.example.gifapp.data.model.repository.GifRepository
 import com.example.gifapp.data.model.repository.Repository
 import com.example.gifapp.ui.presentation.gif.util.FragmentType
 import kotlinx.coroutines.*
+import okhttp3.MediaType.Companion.toMediaType
 
 class GifViewModel(private val repository: Repository) : ViewModel(){
 
@@ -24,9 +25,10 @@ class GifViewModel(private val repository: Repository) : ViewModel(){
 
 
     fun loadGif(type: FragmentType) {
+        Log.d("AAA",type.value)
         scope.launch {
                 Pager.page++
-                Pager.count=0
+
                 _gif.value = when (type) {
                     FragmentType.LATEST -> repository.getGif(type=type,page=Pager.page)
                     FragmentType.TOP -> repository.getGif(type=type,page=Pager.page)

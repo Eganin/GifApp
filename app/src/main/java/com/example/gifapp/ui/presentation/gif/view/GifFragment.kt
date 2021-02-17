@@ -1,5 +1,6 @@
 package com.example.gifapp.ui.presentation.gif.view
 
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -45,8 +46,10 @@ class GifFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel.gif.observe(viewLifecycleOwner, { updateGif(value = it) })
         setListenersView()
-        if (savedInstanceState == null) {
-            load()
+        when(arguments?.getString(SAVE_TYPE)){
+            HOT->changeType(view = binding.hotUnderLine, type = HOT)
+            TOP->changeType(view = binding.topUnderLine, type = TOP)
+            else->changeType(view = binding.latestUnderLine, type = LATEST)
         }
     }
 
@@ -59,16 +62,26 @@ class GifFragment : Fragment() {
         binding.materialNext.setOnClickListener {
             Pager.count++
             if (Pager.count % 5 == 0) {
+                Pager.count=0
                 load()
+                arguments = Bundle().apply {
+                    putInt(SAVE_PAGE,Pager.page)
+                }
             } else {
                 updateView(gif = listGif[Pager.count])
             }
-            Log.d("AAAP", Pager.count.toString())
         }
         binding.materialReset.setOnClickListener {
             if (Pager.count != 0) {
                 Pager.count--
                 updateView(gif = listGif[Pager.count])
+            }else if(Pager.page !=0){
+                Pager.page-=2
+                Pager.count=4
+                load()
+                arguments = Bundle().apply {
+                    putInt(SAVE_PAGE,Pager.page)
+                }
             }
         }
 
@@ -88,44 +101,55 @@ class GifFragment : Fragment() {
     private fun changeType(view: View, type: String) {
         val text = view as TextView
         text.setTextColor(resources.getColor(R.color.black))
+        arguments = Bundle().apply {
+            putString(SAVE_TYPE,type)
+        }
+        Log.d("TYPE",type)
         when (type) {
             LATEST -> {
                 binding.latestUnderLine.isVisible = true
                 binding.hotUnderLine.isVisible = false
                 binding.topUnderLine.isVisible = false
-                binding.gifView.isVisible = true
-                binding.postDescription.isVisible=true
+                binding.postDescription.isVisible = true
+                binding.messageError.isVisible = false
+                binding.imageError.isVisible = false
+                binding.materialGifView.isVisible = true
             }
             TOP -> {
                 binding.latestUnderLine.isVisible = false
                 binding.hotUnderLine.isVisible = false
                 binding.topUnderLine.isVisible = true
-                binding.gifView.isVisible = true
-                binding.postDescription.isVisible=true
+                binding.postDescription.isVisible = true
+                binding.messageError.isVisible = false
+                binding.imageError.isVisible = false
+                binding.materialGifView.isVisible = true
             }
             else -> {
                 binding.latestUnderLine.isVisible = false
                 binding.hotUnderLine.isVisible = true
                 binding.topUnderLine.isVisible = false
-                binding.gifView.isVisible = false
-                binding.postDescription.isVisible=false
+                binding.materialGifView.isVisible = false
+                binding.postDescription.isVisible = false
+                binding.messageError.isVisible = true
+                binding.imageError.isVisible = true
             }
         }
-        if(type != HOT){
-            Pager.count = 0
-            Pager.page = -1
+        if (type != HOT) {
+            Pager.page = arguments?.getInt(SAVE_PAGE)?.minus(1) ?: -1
+            Log.d("PAGE",Pager.page.toString())
             load()
         }
     }
 
     private fun getType() =
         when {
-            binding.latestUnderLine.isVisible -> LATEST
+            binding.hotUnderLine.isVisible -> HOT
             binding.topUnderLine.isVisible -> TOP
-            else -> HOT
+            else -> LATEST
         }
 
     private fun load() {
+
         when (getType()) {
             HOT -> viewModel.loadGif(type = FragmentType.HOT)
             LATEST -> viewModel.loadGif(type = FragmentType.LATEST)
@@ -153,6 +177,8 @@ class GifFragment : Fragment() {
         private const val LATEST = "LATEST"
         private const val HOT = "HOT"
         private const val TOP = "TOP"
+        private const val SAVE_TYPE="SAVE_TYPE"
+        private const val SAVE_PAGE="SAVE_PAGE"
     }
 
 }
