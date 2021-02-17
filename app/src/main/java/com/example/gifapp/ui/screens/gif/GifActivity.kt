@@ -1,5 +1,6 @@
 package com.example.gifapp.ui.screens.gif
 
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.os.PersistableBundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -25,7 +26,7 @@ class GifActivity : AppCompatActivity(), Router {
 
     override fun onDestroy() {
         super.onDestroy()
-        Pager.count--
+        if(Pager.count!=0) Pager.count--
     }
 
     private fun openNewFragment(fragment: Fragment, addToBackStack: Boolean = false) {

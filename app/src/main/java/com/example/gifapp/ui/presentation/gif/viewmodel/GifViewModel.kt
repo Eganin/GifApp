@@ -1,6 +1,6 @@
 package com.example.gifapp.ui.presentation.gif.viewmodel
 
-import android.graphics.pdf.PdfDocument
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.gifapp.data.model.entity.GifResponse
 import com.example.gifapp.data.model.repository.GifRepository
@@ -11,7 +11,7 @@ import kotlinx.coroutines.*
 class GifViewModel(private val repository: Repository) : ViewModel(){
 
 
-    private val dispatcher = Dispatchers.Main.immediate
+    private val dispatcher = Dispatchers.Main
 
     private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         println("$exception in $coroutineContext")
@@ -19,20 +19,20 @@ class GifViewModel(private val repository: Repository) : ViewModel(){
 
     private val scope = CoroutineScope(SupervisorJob()+dispatcher+exceptionHandler)
 
-    private val _gif = MutableLiveData<GifResponse>()
-    val gif: LiveData<GifResponse> = _gif
+    private val _gif = MutableLiveData<List<GifResponse>>()
+    val gif: LiveData<List<GifResponse>> = _gif
 
 
     fun loadGif(type: FragmentType) {
         scope.launch {
-            if(Pager.count % 5 ==0 ) Pager.page++
+                Pager.page++
+                Pager.count=0
+                _gif.value = when (type) {
+                    FragmentType.LATEST -> repository.getGif(type=type,page=Pager.page)
+                    FragmentType.TOP -> repository.getGif(type=type,page=Pager.page)
+                    FragmentType.HOT -> repository.getGif(type=type,page=Pager.page)
+                }
 
-            _gif.value = when (type) {
-                FragmentType.LATEST -> repository.getGif(type=type,page=Pager.count)?.get(Pager.count)
-                FragmentType.TOP -> repository.getGif(type=type,page=Pager.count)?.get(Pager.count)
-                FragmentType.HOT -> repository.getGif(type=type,page=Pager.count)?.get(Pager.count)
-            }
-            Pager.count++
         }
 
     }
@@ -50,5 +50,5 @@ class GifViewModel(private val repository: Repository) : ViewModel(){
 
 object Pager {
     var count = 0
-    var page = 0
+    var page = -1
 }

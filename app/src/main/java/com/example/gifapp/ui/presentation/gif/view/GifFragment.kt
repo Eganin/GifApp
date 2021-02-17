@@ -29,6 +29,8 @@ class GifFragment : Fragment() {
         )
     }
 
+    private var listGif: List<GifResponse> = emptyList()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -41,9 +43,11 @@ class GifFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.gif.observe(viewLifecycleOwner, { updateGifView(value = it) })
+        viewModel.gif.observe(viewLifecycleOwner, { updateGif(value = it) })
         setListenersView()
-        load()
+        if (savedInstanceState == null) {
+            load()
+        }
     }
 
     override fun onDestroy() {
@@ -53,54 +57,71 @@ class GifFragment : Fragment() {
 
     private fun setListenersView() {
         binding.materialNext.setOnClickListener {
-            load()
+            Pager.count++
+            if (Pager.count % 5 == 0) {
+                load()
+            } else {
+                updateView(gif = listGif[Pager.count])
+            }
+            Log.d("AAAP", Pager.count.toString())
         }
         binding.materialReset.setOnClickListener {
-            Pager.count--
-            load()
+            if (Pager.count != 0) {
+                Pager.count--
+                updateView(gif = listGif[Pager.count])
+            }
         }
 
-        binding.tvLatest?.setOnClickListener {
+        binding.tvLatest.setOnClickListener {
             changeType(view = it, type = LATEST)
         }
 
-        binding.tvHot?.setOnClickListener {
+        binding.tvHot.setOnClickListener {
             changeType(view = it, type = HOT)
         }
 
-        binding.tvTop?.setOnClickListener {
+        binding.tvTop.setOnClickListener {
             changeType(view = it, type = TOP)
         }
     }
 
     private fun changeType(view: View, type: String) {
-        Pager.count=0
         val text = view as TextView
         text.setTextColor(resources.getColor(R.color.black))
         when (type) {
             LATEST -> {
-                binding.latestUnderLine?.isVisible = true
-                binding.hotUnderLine?.isVisible = false
-                binding.topUnderLine?.isVisible = false
+                binding.latestUnderLine.isVisible = true
+                binding.hotUnderLine.isVisible = false
+                binding.topUnderLine.isVisible = false
+                binding.gifView.isVisible = true
+                binding.postDescription.isVisible=true
             }
             TOP -> {
-                binding.latestUnderLine?.isVisible = false
-                binding.hotUnderLine?.isVisible = false
-                binding.topUnderLine?.isVisible = true
+                binding.latestUnderLine.isVisible = false
+                binding.hotUnderLine.isVisible = false
+                binding.topUnderLine.isVisible = true
+                binding.gifView.isVisible = true
+                binding.postDescription.isVisible=true
             }
             else -> {
-                binding.latestUnderLine?.isVisible = false
-                binding.hotUnderLine?.isVisible = true
-                binding.topUnderLine?.isVisible = false
+                binding.latestUnderLine.isVisible = false
+                binding.hotUnderLine.isVisible = true
+                binding.topUnderLine.isVisible = false
+                binding.gifView.isVisible = false
+                binding.postDescription.isVisible=false
             }
         }
-        load()
+        if(type != HOT){
+            Pager.count = 0
+            Pager.page = -1
+            load()
+        }
     }
 
     private fun getType() =
         when {
-            binding.latestUnderLine?.isVisible == true -> LATEST
-            binding.topUnderLine?.isVisible == true -> TOP
+            binding.latestUnderLine.isVisible -> LATEST
+            binding.topUnderLine.isVisible -> TOP
             else -> HOT
         }
 
@@ -113,15 +134,19 @@ class GifFragment : Fragment() {
     }
 
 
-    private fun updateGifView(value: GifResponse) {
-        Log.d("AAA", value.gifURL.toString())
+    private fun updateGif(value: List<GifResponse>) {
+        listGif = value
+        updateView(gif = listGif[Pager.count])
+    }
+
+    private fun updateView(gif: GifResponse) {
         Glide.with(this)
             .asGif()
             .apply(options)
-            .load(value.gifURL)
+            .load(gif.gifURL)
             .into(binding.gifView)
 
-
+        binding.postDescription.text = gif.description
     }
 
     companion object {
