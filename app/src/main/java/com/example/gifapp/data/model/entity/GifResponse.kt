@@ -3,74 +3,75 @@ package com.example.gifapp.data.model.entity
 import com.google.gson.annotations.Expose
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
-
-class GifResponse {
+@Serializable
+data class GifResponse (
     @SerializedName("id")
     @Expose
-    var id: Int? = null
+    var id: Int? = null,
 
     @SerializedName("description")
     @Expose
-    var description: String? = null
+    var description: String? = null,
 
     @SerializedName("votes")
     @Expose
-    var votes: Int? = null
+    var votes: Int? = null,
 
     @SerializedName("author")
     @Expose
-    var author: String? = null
+    var author: String? = null,
 
     @SerializedName("date")
     @Expose
-    var date: String? = null
+    var date: String? = null,
 
     @SerializedName("gifURL")
     @Expose
-    var gifURL: String? = null
+    var gifURL: String?=null,
 
     @SerializedName("gifSize")
     @Expose
-    var gifSize: Int? = null
+    var gifSize: Int? = null,
 
     @SerializedName("previewURL")
     @Expose
-    var previewURL: String? = null
+    var previewURL: String? = null,
 
     @SerializedName("videoURL")
     @Expose
-    var videoURL: String? = null
+    var videoURL: String? = null,
 
     @SerializedName("videoPath")
     @Expose
-    var videoPath: String? = null
+    var videoPath: String? = null,
 
     @SerializedName("videoSize")
     @Expose
-    var videoSize: Int? = null
+    var videoSize: Int? = null,
 
     @SerializedName("type")
     @Expose
-    var type: String? = null
+    var type: String? = null,
 
     @SerializedName("width")
     @Expose
-    var width: String? = null
+    var width: String? = null,
 
     @SerializedName("height")
     @Expose
-    var height: String? = null
+    var height: String? = null,
 
     @SerializedName("commentsCount")
     @Expose
-    var commentsCount: Int? = null
+    var commentsCount: Int? = null,
 
     @SerializedName("fileSize")
     @Expose
-    var fileSize: Int? = null
+    var fileSize: Int? = null,
 
     @SerializedName("canVote")
     @Expose
     var canVote: Boolean? = null
-}
+)
