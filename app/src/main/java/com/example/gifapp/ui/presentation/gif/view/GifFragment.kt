@@ -1,6 +1,5 @@
 package com.example.gifapp.ui.presentation.gif.view
 
-import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.gifapp.R
 import com.example.gifapp.application.GifApp
@@ -17,6 +15,7 @@ import com.example.gifapp.data.model.entity.GifResponse
 import com.example.gifapp.databinding.FragmentGifBinding
 import com.example.gifapp.ui.presentation.gif.util.FragmentType
 import com.example.gifapp.ui.presentation.gif.util.options
+import com.example.gifapp.ui.presentation.gif.viewmodel.GifViewModel
 import com.example.gifapp.ui.presentation.gif.viewmodel.Pager
 
 class GifFragment : Fragment() {
@@ -44,29 +43,54 @@ class GifFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.gif.observe(viewLifecycleOwner, { updateGif(value = it) })
+        viewModel.gif.observe(viewLifecycleOwner, this::updateGif)
+        viewModel.state.observe(viewLifecycleOwner, this::setState)
         setListenersView()
-        when(arguments?.getString(SAVE_TYPE)){
-            HOT->changeType(view = binding.hotUnderLine, type = HOT)
-            TOP->changeType(view = binding.topUnderLine, type = TOP)
-            else->changeType(view = binding.latestUnderLine, type = LATEST)
+        when (arguments?.getString(SAVE_TYPE)) {
+            HOT -> changeType(view = binding.hotUnderLine, type = HOT)
+            TOP -> changeType(view = binding.topUnderLine, type = TOP)
+            else -> changeType(view = binding.latestUnderLine, type = LATEST)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+        Pager.page++
+    }
+
+    private fun setState(state: GifViewModel.State) =
+        when (state) {
+            GifViewModel.State.Error -> changeState(stateCondition = true)
+            GifViewModel.State.Success -> {
+                setLoading(state = false)
+                changeState(stateCondition = false)
+            }
+            GifViewModel.State.Loading -> setLoading(state = true)
+
+            GifViewModel.State.Default -> {
+            }
+        }
+
+    private fun changeState(stateCondition: Boolean) {
+        binding.messageError.isVisible = stateCondition
+        binding.imageError.isVisible = stateCondition
+        binding.materialGifView.isVisible = !stateCondition
+        binding.materialNext.isEnabled=!stateCondition
+        binding.materialReset.isEnabled=!stateCondition
+    }
+
+    private fun setLoading(state: Boolean) {
+        binding.progressBar.isVisible = state
     }
 
     private fun setListenersView() {
         binding.materialNext.setOnClickListener {
+            Log.d("SIZE",listGif.size.toString())
             Pager.count++
             if (Pager.count % 5 == 0) {
-                Pager.count=0
+                Pager.count = 0
                 load()
-                arguments = Bundle().apply {
-                    putInt(SAVE_PAGE,Pager.page)
-                }
             } else {
                 updateView(gif = listGif[Pager.count])
             }
@@ -75,13 +99,10 @@ class GifFragment : Fragment() {
             if (Pager.count != 0) {
                 Pager.count--
                 updateView(gif = listGif[Pager.count])
-            }else if(Pager.page !=0){
-                Pager.page-=2
-                Pager.count=4
+            } else if (Pager.page != 0) {
+                Pager.page -= 2
+                Pager.count = 4
                 load()
-                arguments = Bundle().apply {
-                    putInt(SAVE_PAGE,Pager.page)
-                }
             }
         }
 
@@ -102,43 +123,34 @@ class GifFragment : Fragment() {
         val text = view as TextView
         text.setTextColor(resources.getColor(R.color.black))
         arguments = Bundle().apply {
-            putString(SAVE_TYPE,type)
+            putString(SAVE_TYPE, type)
         }
-        Log.d("TYPE",type)
         when (type) {
             LATEST -> {
                 binding.latestUnderLine.isVisible = true
                 binding.hotUnderLine.isVisible = false
                 binding.topUnderLine.isVisible = false
                 binding.postDescription.isVisible = true
-                binding.messageError.isVisible = false
-                binding.imageError.isVisible = false
-                binding.materialGifView.isVisible = true
             }
             TOP -> {
                 binding.latestUnderLine.isVisible = false
                 binding.hotUnderLine.isVisible = false
                 binding.topUnderLine.isVisible = true
                 binding.postDescription.isVisible = true
-                binding.messageError.isVisible = false
-                binding.imageError.isVisible = false
-                binding.materialGifView.isVisible = true
             }
             else -> {
                 binding.latestUnderLine.isVisible = false
                 binding.hotUnderLine.isVisible = true
                 binding.topUnderLine.isVisible = false
-                binding.materialGifView.isVisible = false
                 binding.postDescription.isVisible = false
-                binding.messageError.isVisible = true
-                binding.imageError.isVisible = true
             }
         }
-        if (type != HOT) {
-            Pager.page = arguments?.getInt(SAVE_PAGE)?.minus(1) ?: -1
-            Log.d("PAGE",Pager.page.toString())
-            load()
+        if (Pager.page != -1&&type!=HOT) {
+            Pager.page--
+        } else {
+            Pager.page = -1
         }
+        load()
     }
 
     private fun getType() =
@@ -149,7 +161,7 @@ class GifFragment : Fragment() {
         }
 
     private fun load() {
-
+        Log.d("LOAD",getType())
         when (getType()) {
             HOT -> viewModel.loadGif(type = FragmentType.HOT)
             LATEST -> viewModel.loadGif(type = FragmentType.LATEST)
@@ -177,8 +189,7 @@ class GifFragment : Fragment() {
         private const val LATEST = "LATEST"
         private const val HOT = "HOT"
         private const val TOP = "TOP"
-        private const val SAVE_TYPE="SAVE_TYPE"
-        private const val SAVE_PAGE="SAVE_PAGE"
+        private const val SAVE_TYPE = "SAVE_TYPE"
     }
 
 }
